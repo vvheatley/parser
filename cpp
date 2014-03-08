@@ -11,8 +11,7 @@ enum ttype{
 	RBRACKET,
 };
 
-const char delim[] = "+-/*()^%";
-
+const char delim[] = "+-/*()";
 
 inline bool isDelim (char *symb)
 {
@@ -47,7 +46,7 @@ ttype tokenizer (char *&token, char *expr, int &pos)
 	}
 
 	symb++;
-	while(*symb != '\0' &&*symb != ' ' && !isDelim(symb)){
+	while(*symb != '\0' && *symb != ' ' && !isDelim(symb)){
 		symb++;
 	}
 	int size = symb - expr - pos + 1;
@@ -58,11 +57,32 @@ ttype tokenizer (char *&token, char *expr, int &pos)
 	return NUMBER;
 }
 
+int priority(char op)
+{
+	switch (op){
+		case '+':case'-':return 0;
+		case '*':case'/':return 1;
+	}
+	//return -1;
+}
+ttype valType(char token){
+	switch (token){
+		case '(':return LBRACKET;
+		case ')':return RBRACKET;
+		default :return OPERATOR;
+	}
+}
 
+template <size_t size>
+void printStack(char (&stack)[size], int opTop){
+	while (opTop >=0)
+		cout << stack[opTop--] << "  ";
+	cout << endl;
 
+}
 void main()
 {
-	char operatorStack[200], *inputStack[200];
+	char stack[200], *inputStack[200];
 	int opTop = 0, inpTop = 0;
 
 	double res = 0;
@@ -77,29 +97,33 @@ void main()
 	int n = 0;
 
 	while ((type = tokenizer (token, input, n)) != END){
-		if (type == OPERATOR){
-			lastOperator = token[0];
-		}
+		if (type == NUMBER) cout << token << " ";
 
-		else if (type == NUMBER){
-			switch (lastOperator)
-			{
-				case '+': res += atof(token); break;
-				case '-': res -= atof(token); break;
-				case '*': res *= atof(token); break;
-				case '/': res /= atof(token); break;
+		else if (type == OPERATOR){
+			while (opTop > 0 && valType(stack[opTop-1]) == OPERATOR && priority(token[0]) <= priority(stack[opTop-1])){
+
+				cout << stack[--opTop] << " ";
 			}
-
-
+			stack[opTop++] = token[0];
 		}
-		inputStack[inpTop++] = token;
-		cout << token << "|\n";
-	}
-	while (inpTop > 0){
-		cout << inputStack[--inpTop] << endl;
-	}
-	cout << endl << res;
-	
 
+		else if (type == LBRACKET) stack[opTop++] = token[0];
+
+		else if (type == RBRACKET) {
+			while (valType(stack[opTop-1]) != LBRACKET){
+				cout << stack[--opTop] << " ";
+			}
+			if (opTop > 0) opTop--;
+			else {
+				cout << "Error";
+				opTop = 0;
+				break;
+			}
+		}
+	}
+	while (opTop > 0){
+		if (valType(stack[opTop-1]) != OPERATOR) { cout << "Error"; break; }
+		cout << stack[--opTop] << " ";
+	}
 	cin.get();
 }
