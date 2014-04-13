@@ -200,7 +200,7 @@ inline bool isDouble (char* chFirst, char* chLast){
 	return true;
 }
 //------------------------------------------------------------------------------
-Value ntokenizer(char *&token, char *expr, int &pos)
+Value ntokenizer( char *expr, int &pos)
 {
 	Value retValue;
 	//delete token;
@@ -208,10 +208,9 @@ Value ntokenizer(char *&token, char *expr, int &pos)
 
 	while (*chFirst == ' '){ //spaces
 		chFirst++;
-		pos++;
+		//pos++;
 	}
 	if (*chFirst == '\0') {
-		token = NULL;
 		retValue.type = END;
 		return retValue;
 	}
@@ -227,25 +226,28 @@ Value ntokenizer(char *&token, char *expr, int &pos)
 		int index;
 
 		//if isBinary {retValue.ttype = bin; retValue.Binary = Binary[i] }	
-		if (index = findName(chFirst, chLast, arrBinaryNames) >= 0) {
+		if ((index = findName(chFirst, chLast, arrBinaryNames)) != -1) {
 			retValue.type = BIN_OPERATOR;
 			retValue.binary = arrBinary[index];
+			break;
 		}
 
 		//if is Function { retValue.ttype = FUNCTION; retValue.Function = function[i]}
-		if (index = findName(chFirst, chLast, arrFunctionNames) >= 0){
+		else if ((index = findName(chFirst, chLast, arrFunctionNames)) != -1){
 			retValue.type = FUNCTION;
 			retValue.function = arrFunction[index];
+			break;
 		}
 
 		//if is double { retValue.ttype = NUMBER; retValue.number = atoi (token); }
-		if (isDouble(chFirst, chLast)) {
+		else if (isDouble(chFirst, chLast)) {
 			retValue.type = NUMBER;
-			retValue.number = atoi(token);
+			retValue.number = atoi(chFirst);
+			break;
 		}
 		--chLast;
 	}
-
+	pos = chLast - expr;
 	return retValue;
 }
 	/*
@@ -325,57 +327,43 @@ Value ntokenizer(char *&token, char *expr, int &pos)
 //	return NUMBER;
 //}
 
-//int priority(char op)
-//{
-//	switch (op){
-//		case '+':case'-':	return 0;
-//		case '*':case'/':	return 1;
-//		case '^'		:	return 2;
-//	}
-//}
-//ttype valType(char token)
-//{
-//	switch (token){
-//		case '(':return LBRACKET;
-//		case ')':return RBRACKET;
-//		case '+': case'-': case'*':case'/':case'^': return BIN_OPERATOR;
-//		default :return NUMBER;
-//	}
-//}
 
-//bool isRightAssociated(char operation)
-//{
-//	switch (operation){
-//		case '^': return true;
-//	}
-//	return false;
-//}
 
-//template <size_t size>
-//void calcQueueHead(double(&queue)[size], int &head, char op)
-//{
-//	switch (op){
-//		case '+':	queue[head - 1] += queue[head]; break;
-//		case '-':	queue[head - 1] -= queue[head]; break;
-//		case '*':	queue[head - 1] *= queue[head]; break;
-//		case '/':	queue[head - 1] /= queue[head]; break;
-//		case '^':	queue[head - 1] =  pow (queue[head-1], queue[head]) ; break;
-//	}
-//	--head;
-//}
+template <size_t size>
+void calcQueueHead(double(&queue)[size], int &head, char op)
+{
+	switch (op){
+		case '+':	queue[head - 1] += queue[head]; break;
+		case '-':	queue[head - 1] -= queue[head]; break;
+		case '*':	queue[head - 1] *= queue[head]; break;
+		case '/':	queue[head - 1] /= queue[head]; break;
+		case '^':	queue[head - 1] =  pow (queue[head-1], queue[head]) ; break;
+	}
+	--head;
+}
 
 void main()
 {
-	char* expr = "0123+cot-893";
+	char* expr = "0123+^tg(3)-893";
 	char* chFirst = expr + 5;
 	char* chLast = expr + 8;
 	
-	int index;
-	if ((index = findName(chFirst, chLast, arrBinaryNames)) != -1) cout << "binary" << index;
+	//int index;
+	//if ((index = findName(chFirst, chLast, arrBinaryNames)) != -1) cout << "binary" << index;
 
-	else if ((index = findName(chFirst, chLast, arrFunctionNames)) != -1) cout << "function " << index<< " " <<arrFunctionNames[index][0];
-	else if (isDouble(chFirst, chLast)) cout << "double " << atoi(chFirst);
+	//else if ((index = findName(chFirst, chLast, arrFunctionNames)) != -1) cout << "function " << index<< " " <<arrFunctionNames[index][0];
+	//else if (isDouble(chFirst, chLast)) cout << "double " << atoi(chFirst);
+	//else cout << "undef";
+
+	int n = 5;
+	Value tok = ntokenizer(expr, n);
+	if (tok.type == FUNCTION) cout << "function " << tok.function.foo(1);
+	else if (tok.type == BIN_OPERATOR) cout << "bin " << tok.binary.pFunc(2, 3);
+	else if (tok.type == NUMBER) cout << "numb " << tok.number;
 	else cout << "undef";
+
+	cout << endl << n;
+
 	/*
 	double outQueue[100];
 	char stack[200], *inputStack[200];
