@@ -126,8 +126,8 @@ inline bool isDelim (char *chFirst)
 		char** nameArr = arrBinaryNames[binIndex];
 		char* chExample, *chToken;
 
-		while (nameArr){					//масив імен
-			chExample = *nameArr; //перший символ зразку
+		while (nameArr){					//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+			chExample = *nameArr; //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 			chToken = chFirst;
 
 			while (chExample && chToken < chLast){
@@ -154,8 +154,8 @@ inline int findName(char* chFirst, char* chLast, char*** arrExampleNames)
 	while (arrExampleNames[index]){
 		arrNames = arrExampleNames [index];
 
-		while (*arrNames){					//масив імен
-			chExample = *arrNames; //перший символ зразку
+		while (*arrNames){					//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+			chExample = *arrNames; //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 			chToken = chFirst;
 
 			while (chExample && chToken < chLast){
