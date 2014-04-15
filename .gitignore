@@ -1,1 +1,6 @@
 parser.opensdf
+*.suo
+*.filters
+*.vcxproj
+*.sln
+*.sdf
