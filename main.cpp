@@ -1,19 +1,10 @@
 #include <iostream>
 #include <math.h>
 
-#define M_PI_2     1.57079632679489661923
+#include "value.h"
+#include "tree.h"
 
 using namespace std;
-
-enum ttype{
-	END,
-	UN_OPERATOR,
-	BIN_OPERATOR,
-	NUMBER,
-	LBRACKET,
-	RBRACKET,
-	FUNCTION
-};
 
 enum binaryIndex{
 	ADD,
@@ -21,82 +12,6 @@ enum binaryIndex{
 	MLT,
 	DIV,
 	POW
-};
-
-struct Binary
-{
-	 double (*pFunc) (double, double);
-	 bool isLeftAssoc;
-	 int precedence;
-};
-
-char* addNames[] = { "+", "plus",	NULL };
-char* subNames[] = { "-", "minus",	NULL };
-char* mltNames[] = { "*", "mult",	NULL };
-char* divNames[] = { "/", "divide", NULL };
-char* powNames[] = { "^", "**",		NULL };
-
-char** arrBinaryNames[] = {
-	addNames,
-	subNames,
-	mltNames,
-	divNames,
-	powNames,
-	NULL
-};
-
-double add (double op1, double op2) { return op1 + op2; } 
-double sub (double op1, double op2) { return op1 - op2; }
-double div (double op1, double op2) { return op2==0 ? 0 : op1 / op2; }
-double mlt (double op1, double op2) { return op1 * op2; }
-
-const Binary arrBinary[] = {
-	{ add,	true,	1 },
-	{ sub,	true,	1 },
-	{ mlt,	true,	2 },
-	{ div,	true,	2 },
-	{ pow,	false,	3 }
-};
-const int binaryCount = sizeof(arrBinary) / sizeof(arrBinary[0]);
-//================================================================================
-char* sinNames[] = { "sin", NULL };
-char* cosNames[] = { "cos", NULL };
-char* tanNames[] = { "tg", "tan", NULL };
-char* cotNames[] = { "ctg", "cot", NULL };
-
-char** arrFunctionNames[] = {
-	sinNames,
-	cosNames,
-	tanNames,
-	cotNames,
-	NULL
-};
-const int functionCount = sizeof(arrFunctionNames) / sizeof(arrFunctionNames[0]);
-
-struct Function
-{
-	int argsCnt;
-	double (*foo) (double);
-
-};
-
-double cot (double x) { return tan(3.1415/2 - x);}
-
-Function arrFunction[] = {
-	{1, sin },
-	{1, cos },
-	{1, tan },
-	{1, cot }
-};
-//====================================================================================
-struct Value
-{
-	ttype type;
-	union{
-		double number;
-		Binary binary;
-		Function function;
-	};
 };
 
 const char delim[] = "+-*/^()";
@@ -118,30 +33,6 @@ inline bool isDelim (char *chFirst)
 	return false;
 }
 //------------------------------------------------------------------------------------
-/*inline int isBinary(char* chFirst, char* chLast)
-{
-	int binIndex = 0;
-
-	for (; binIndex < binaryCount; ++binIndex){
-		char** nameArr = arrBinaryNames[binIndex];
-		char* chExample, *chToken;
-
-		while (nameArr){					//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
-			chExample = *nameArr; //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
-			chToken = chFirst;
-
-			while (chExample && chToken < chLast){
-				if (*chExample != *chToken) break; 
-				++chExample; ++chToken;
-			}
-			if (chExample && chToken == chLast) return binIndex;
-
-			++nameArr;
-		}
-	} //end for
-	return -1;
-}
-*/
 //------------------------------------------------------------------------------
 inline int findName(char* chFirst, char* chLast, char*** arrExampleNames)
 {
@@ -154,8 +45,8 @@ inline int findName(char* chFirst, char* chLast, char*** arrExampleNames)
 	while (arrExampleNames[index]){
 		arrNames = arrExampleNames [index];
 
-		while (*arrNames){					//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
-			chExample = *arrNames; //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+		while (*arrNames){					//масив імен
+			chExample = *arrNames; //перший символ зразку
 			chToken = chFirst;
 
 			while (chExample && chToken < chLast){
@@ -250,45 +141,7 @@ Value ntokenizer( char *expr, int &pos)
 	pos = chLast - expr;
 	return retValue;
 }
-	/*
-	if (int firstSymbType = isGarantedDelim(chFirst) >= 0) {
-		char * chLast = chFirst;
-		for (; *chLast != '\0'; ++chLast) if ('0' <= *chLast <= '9' || 'a' <= *chLast <= 'z' || 'A' <= *chLast <= 'Z') break;
-		if (chLast - chFirst == 1){
 
-			token = new char[2];
-			token[0] = *chFirst;
-			token[1] = '\0';
-			++pos;
-			if (firstSymbType < 4) {
-				retValue.type = BIN_OPERATOR;  return Value(BIN_OPERATOR, arrBinary[i])
-			}
-
-			switch (*chFirst){
-				case '(': retValue.type = LBRACKET; break;
-				case ')': retValue.type = RBRACKET; break;
-				default:  retValue.type = BIN_OPERATOR;
-			}
-			return retValue;
-		}
-		else{
-			token = new char[chLast-chFirst];
-		
-		}
-	}
-
-	chFirst++;
-	while (*chFirst != '\0' && *chFirst != ' ' && !isDelim(chFirst)){
-		chFirst++;
-	}
-	int size = chFirst - expr - pos + 1;
-	token = new char[size];
-	memcpy(token, expr + pos, size - 1);
-	token[size - 1] = '\0';
-	pos = chFirst - expr;
-	return NUMBER;
-}
-*/
 //ttype tokenizer (char *&token, char *expr, int &pos)
 //{
 //	//delete token;
@@ -326,8 +179,6 @@ Value ntokenizer( char *expr, int &pos)
 //	pos = chFirst-expr;
 //	return NUMBER;
 //}
-
-
 
 template <size_t size>
 void calcQueueHead(double(&queue)[size], int &head, char op)
