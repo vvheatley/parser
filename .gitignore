@@ -2,3 +2,7 @@
 *.log
 *.vcxproj
 *.filters
+*.tlog
+*.obj
+*.idb
+*.pdb
