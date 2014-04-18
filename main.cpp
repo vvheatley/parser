@@ -150,25 +150,23 @@ Value ntokenizer( char *expr, int &pos)
 
 
 template <size_t size>
-void calcQueueHead(double(&queue)[size], int &head, char op)
+void calcQueueHead(Value (&queue)[size], int &head, const Binary &op)
 {
-	switch (op){
-		case '+':	queue[head - 1] += queue[head]; break;
-		case '-':	queue[head - 1] -= queue[head]; break;
-		case '*':	queue[head - 1] *= queue[head]; break;
-		case '/':	queue[head - 1] /= queue[head]; break;
-		case '^':	queue[head - 1] =  pow (queue[head-1], queue[head]) ; break;
-	}
+	Value result;
+	result.type = NUMBER;
+	result.number = op.pFunc(queue[head-1].number, queue[head].number);
+
+	queue[head - 1] = result;
 	--head;
 }
 
 void print(const Value &val)
 {
 	switch(val.type){
-		case NUMBER:		cout << "num"	<< val.number; break;
+		case NUMBER:		cout << ""	<< val.number; break;
 		case UN_OPERATOR:	cout << "un" << arrBinaryNames[val.unary.index][0]; break;
-		case BIN_OPERATOR:	cout << "bin"	<< arrBinaryNames[val.binary.index][0]; break;
-		case FUNCTION:		cout << "func_"	<<arrFunctionNames[val.function.index][0]; break;
+		case BIN_OPERATOR:	cout << arrBinaryNames[val.binary.index][0]; break;
+		case FUNCTION:		cout << arrFunctionNames[val.function.index][0]; break;
 		case LBRACKET:		cout << "("; break;
 		case RBRACKET:		cout << ")"; break;
 		case END:			cout << "end"; break;
@@ -298,7 +296,7 @@ void main()
 	while (token.type != END){
 		if (token.type == NUMBER){
 			print(token);
-			//outQueue[++head] = token;
+			outQueue[++head] = token;
 		}
 
 		else if (token.type == BIN_OPERATOR){
@@ -309,7 +307,7 @@ void main()
 				}
 				else if (token.binary.precedence >= stack[opTop].binary.precedence) break;
 
-				//calcQueueHead(outQueue, head, stack[opTop]);
+				calcQueueHead(outQueue, head, stack[opTop].binary);
 				print(stack[opTop--]);
 			}
 			stack[++opTop] = token;
@@ -321,7 +319,7 @@ void main()
 
 		else if (token.type == RBRACKET){
 			while (stack[opTop].type != LBRACKET){
-				//calcQueueHead(outQueue, head, stack[opTop]);
+				calcQueueHead(outQueue, head, stack[opTop].binary);
 				print(stack[opTop--]);
 			}
 			if (opTop >= 0) opTop--;
@@ -333,9 +331,11 @@ void main()
 	//--------------
 	while (opTop >= 0){
 		if (stack[opTop].type != BIN_OPERATOR) { cout << "\nError"; cin.get(); exit(1); }
-		//calcQueueHead(outQueue, head, stack[opTop]);
+		calcQueueHead(outQueue, head, stack[opTop].binary);
 		print (stack[opTop--]);
 	}
+	cout << "\nresult: ";
+	print(outQueue[0]);
 
 	cin.get();
 }
