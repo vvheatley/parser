@@ -107,40 +107,42 @@ Value ntokenizer( char *expr, int &pos)
 		return retValue;
 	}
 
+	char* chLast = chFirst + 1; //наступний символ після останнього символа токена
 	if (*chFirst == '(')	retValue.type = LBRACKET;
 	else if (*chFirst == ')')	retValue.type = RBRACKET;
+	else {
 
-	char* chLast = chFirst + 1; //наступний символ після останнього символа токена
 
-	while (isGarantedDelim(chLast) == -1) ++chLast;
+		while (isGarantedDelim(chLast) == -1) ++chLast;
 
-	while (chLast > chFirst){
-		int index;
+		while (chLast > chFirst){
+			int index;
 
-		//if is double { retValue.ttype = NUMBER; retValue.number = atoi (token); }
-		if (isDouble(chFirst, chLast)) {
-			retValue.type = NUMBER;
-			retValue.number = atoi(chFirst);
-			break;
+			//if is double { retValue.ttype = NUMBER; retValue.number = atoi (token); }
+			if (isDouble(chFirst, chLast)) {
+				retValue.type = NUMBER;
+				retValue.number = atoi(chFirst);
+				break;
+			}
+
+			//if isBinary {retValue.ttype = bin; retValue.Binary = Binary[i] }	
+			else if ((index = findName(chFirst, chLast, arrBinaryNames)) != -1) {
+				retValue.type = BIN_OPERATOR;
+				retValue.binary = arrBinary[index];
+				retValue.binary.index = index;
+				break;
+			}
+
+			//if is Function { retValue.ttype = FUNCTION; retValue.Function = function[i]}
+			else if ((index = findName(chFirst, chLast, arrFunctionNames)) != -1){
+				retValue.type = FUNCTION;
+				retValue.function = arrFunction[index];
+				retValue.function.index = index;
+				break;
+			}
+
+			--chLast;
 		}
-
-		//if isBinary {retValue.ttype = bin; retValue.Binary = Binary[i] }	
-		else if ((index = findName(chFirst, chLast, arrBinaryNames)) != -1) {
-			retValue.type = BIN_OPERATOR;
-			retValue.binary = arrBinary[index];
-			retValue.binary.index = index;
-			break;
-		}
-
-		//if is Function { retValue.ttype = FUNCTION; retValue.Function = function[i]}
-		else if ((index = findName(chFirst, chLast, arrFunctionNames)) != -1){
-			retValue.type = FUNCTION;
-			retValue.function = arrFunction[index];
-			retValue.function.index = index;
-			break;
-		}
-
-		--chLast;
 	}
 	pos = chLast - expr;
 	return retValue;
@@ -164,9 +166,12 @@ void print(const Value &val)
 {
 	switch(val.type){
 		case NUMBER:		cout << "num"	<< val.number; break;
+		case UN_OPERATOR:	cout << "un" << arrBinaryNames[val.unary.index][0]; break;
 		case BIN_OPERATOR:	cout << "bin"	<< arrBinaryNames[val.binary.index][0]; break;
-		case FUNCTION:		cout << "func"	<<arrFunctionNames[val.function.index][0]; break;
-		case END:			cout << "end";
+		case FUNCTION:		cout << "func_"	<<arrFunctionNames[val.function.index][0]; break;
+		case LBRACKET:		cout << "("; break;
+		case RBRACKET:		cout << ")"; break;
+		case END:			cout << "end"; break;
 		default:			cout << "undef";
 	}
 	cout << " ";
@@ -174,7 +179,7 @@ void print(const Value &val)
 //------------------------------------------------------------------------------------------
 void main()
 {
-	char* expr = "01+34";
+	//char* expr = "01+34";
 	//char* chFirst = expr + 5;
 	//char* chLast = expr + 8;
 	//
@@ -183,20 +188,18 @@ void main()
 	//else if ((index = findName(chFirst, chLast, arrFunctionNames)) != -1) cout << "function " << index<< " " <<arrFunctionNames[index][0];
 	//else if (isDouble(chFirst, chLast)) cout << "double " << atoi(chFirst);
 	//else cout << "undef";
+	//int n = 3;
 
-	int n = 3;
-
-	Value tok = ntokenizer(expr, n);
-	print(tok);
+	//Value tok = ntokenizer(expr, n);
+	//print(tok);
 	//if (tok.type == FUNCTION) cout << "function " << tok.function.foo(1);
 	//else if (tok.type == BIN_OPERATOR) cout << "bin " << tok.binary.pFunc(2, 3);
 	//else if (tok.type == NUMBER) cout << "numb " << tok.number;
 	//else if (tok.type == END) cout << "end ";
 	//else cout << "undef";
+	//cout << endl << n;
 
-	cout << endl << n;
-
-	/*
+	/* 
 	double outQueue[100];
 	char stack[200], *inputStack[200];
 	int opTop = -1, inpTop = 0, head = -1;
@@ -275,57 +278,64 @@ void main()
 	cout << "\nresult: " << outQueue[0];
 	*/
 
-	//Value outQueue[100];
-	//Value stack[100];
-	//int opTop = -1, head = -1;
+	Value outQueue[100];
+	Value stack[100];
+	int opTop = -1, head = -1;
 
-	//Value token;
+	Value token;
 
-	//char input[300];
-	//cin.getline(input, 300);
+	char input[300];
+	cin.getline(input, 300);
 
-	//int pos = 0;
-	//token = ntokenizer(input, pos);
+	int pos = 0;
+	token = ntokenizer(input, pos);
+
 	//while (token.type != END){
-	//	if (token.type == NUMBER){
-	//		outQueue[++head] = token;
-	//	}
-
-	//	else if (token.type == BIN_OPERATOR){
-	//		while (opTop >= 0 && stack[opTop].type == BIN_OPERATOR){
-	//			if (token.binary.isLeftAssoc)
-	//			{
-	//				if (token.binary.precedence > stack[opTop].binary.precedence) break;
-	//			}
-	//			else if (token.binary.precedence >= stack[opTop].binary.precedence) break;
-
-	//			//calcQueueHead(outQueue, head, stack[opTop]);
-	//			print(stack[opTop--]);
-	//		}
-	//		stack[++opTop] = token;
-	//	}
-
-	//	else if (token.type == LBRACKET) {
-	//		stack[++opTop] = token;
-	//	}
-	//	else if (token.type == RBRACKET){
-	//		while (stack[opTop].type != LBRACKET){
-	//			//calcQueueHead(outQueue, head, stack[opTop]);
-	//			print(stack[opTop--]);
-	//		}
-	//		if (opTop >= 0) opTop--;
-	//		else { cout << "\nError"; opTop = -1; cin.get(); exit(1); }
-
-	//	}
+	//	print(token);
 	//	token = ntokenizer(input, pos);
-	//} //end while
-
-	////--------------
-	//while (opTop >= 0){
-	//	if (stack[opTop].type != BIN_OPERATOR) { cout << "\nError"; cin.get(); exit(1); }
-	//	//calcQueueHead(outQueue, head, stack[opTop]);
-	//	print (stack[opTop--]);
 	//}
+	
+	while (token.type != END){
+		if (token.type == NUMBER){
+			print(token);
+			//outQueue[++head] = token;
+		}
+
+		else if (token.type == BIN_OPERATOR){
+			while (opTop >= 0 && stack[opTop].type == BIN_OPERATOR){
+				if (token.binary.isLeftAssoc)
+				{
+					if (token.binary.precedence > stack[opTop].binary.precedence) break;
+				}
+				else if (token.binary.precedence >= stack[opTop].binary.precedence) break;
+
+				//calcQueueHead(outQueue, head, stack[opTop]);
+				print(stack[opTop--]);
+			}
+			stack[++opTop] = token;
+		}
+
+		else if (token.type == LBRACKET) {
+			stack[++opTop] = token;
+		}
+
+		else if (token.type == RBRACKET){
+			while (stack[opTop].type != LBRACKET){
+				//calcQueueHead(outQueue, head, stack[opTop]);
+				print(stack[opTop--]);
+			}
+			if (opTop >= 0) opTop--;
+			else { cout << "\nError"; opTop = -1; cin.get(); exit(1); }
+		}
+		token = ntokenizer(input, pos);
+	} //end while
+
+	//--------------
+	while (opTop >= 0){
+		if (stack[opTop].type != BIN_OPERATOR) { cout << "\nError"; cin.get(); exit(1); }
+		//calcQueueHead(outQueue, head, stack[opTop]);
+		print (stack[opTop--]);
+	}
 
 	cin.get();
 }

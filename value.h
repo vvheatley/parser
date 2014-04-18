@@ -30,11 +30,11 @@ struct Value
 	union{
 		double number;
 		Binary binary;
+		Unary unary;
 		Function function;
 	};
 	Value(){}
-	Value(const Value &val2){
-		type = val2.type;
+	Value(const Value &val2): type (val2.type) {
 		if (val2.type == NUMBER) number = val2.number;
 		else if (val2.type == BIN_OPERATOR) binary = val2.binary;
 		else if (val2.type == FUNCTION) function = val2.function;
