@@ -5,6 +5,7 @@
 #include <iostream>
 #include <math.h>
 
+#include "unary.h"
 #include "binary.h"
 #include "function.h"
 
