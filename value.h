@@ -23,11 +23,10 @@ enum ttype{
 
 
 //================================================================================
-
 struct Value
 {
 	ttype type;
-	union{
+	union {
 		double number;
 		Binary binary;
 		Unary unary;
@@ -40,6 +39,5 @@ struct Value
 		else if (val2.type == FUNCTION) function = val2.function;
 	}
 };
-
 
 #endif

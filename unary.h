@@ -7,8 +7,7 @@
 struct Unary
 {
 	double (*pFunc) (double);
-	bool isPrefix;
-	int precedence;
+	//int precedence;
 	int index;
 };
 
@@ -24,11 +23,21 @@ char** arrUnaryNames[] = {
 double neg (double op) { return -op; }
 double pos (double op) { return -op; }
 
+bool isPrefix[] = {
+	true,
+	true
+};
+int unPrecedence[] = {
+	0,
+	0
+};
 const Unary arrUnary[] = {
-	{ neg, true, 1, 0},
-	{ pos, true, 1, 1 },
+	{ neg, 0},
+	{ pos, 1 },
 
 };
+
+
 const int unaryCount = sizeof(arrUnary) / sizeof(arrUnary[0]);
 
 #endif

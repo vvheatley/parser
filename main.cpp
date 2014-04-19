@@ -6,7 +6,6 @@
 
 using namespace std;
 
-const char delim[] = "+-*/^()";
 const char garantedDelim[] = " ()\0";
 
 inline int isGarantedDelim (char *chFirst)
@@ -17,13 +16,6 @@ inline int isGarantedDelim (char *chFirst)
 	return -1;
 }
 //------------------------------------------------------------------------------------
-inline bool isDelim (char *chFirst)
-{
-	for (int i = 0; delim[i] != '\0'; ++i){
-		if (*chFirst == delim[i] || *chFirst == '\0') return true;
-	}
-	return false;
-}
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 inline int findName(char* chFirst, char* chLast, char*** arrExampleNames)
@@ -74,13 +66,16 @@ inline bool isDouble (char* chFirst, char* chLast){
 
 	while (true){
 		if (ch == chLast) return size1 || size2 ? true : false;
-		if (*ch == 'e' || *ch == 'E') { if (!size1 && !size2) return false; }
+		if (*ch == 'e' || *ch == 'E') { 
+			if (!size1 && !size2) return false;
+			break; 
+		}
 		if (!isdigit(*ch)) return false;
 
 		++size2;
 		++ch;
 	}
-
+	++ch;
 	if (*ch == '-' || *ch == '+') ++ch;
 
 	for (; ch != chLast; ++ch){
@@ -107,7 +102,8 @@ Value ntokenizer( char *expr, int &pos)
 		return retValue;
 	}
 
-	char* chLast = chFirst + 1; //наступний символ після останнього символа токена
+	char* chLast = chFirst + 1;	 //наступний символ після останнього символа токена
+
 	if (*chFirst == '(')	retValue.type = LBRACKET;
 	else if (*chFirst == ')')	retValue.type = RBRACKET;
 	else {
@@ -121,7 +117,7 @@ Value ntokenizer( char *expr, int &pos)
 			//if is double { retValue.ttype = NUMBER; retValue.number = atoi (token); }
 			if (isDouble(chFirst, chLast)) {
 				retValue.type = NUMBER;
-				retValue.number = atoi(chFirst);
+				retValue.number = atof(chFirst);
 				break;
 			}
 
@@ -175,16 +171,21 @@ void print(const Value &val)
 	cout << " ";
 }
 //------------------------------------------------------------------------------------------
+
 void main()
 {
-	//char* expr = "01+34";
+	//cout << sizeof (Value) << " " << " " << sizeof (ttype) << "\n" << sizeof (double) << " " << sizeof (Binary) << " " << sizeof (Unary) << " " <<  sizeof (Function);
+
+	//char* expr = "2e+3";
 	//char* chFirst = expr + 5;
 	//char* chLast = expr + 8;
 	//
 	//int index;
 	//if ((index = findName(chFirst, chLast, arrBinaryNames)) != -1) cout << "binary" << index;
 	//else if ((index = findName(chFirst, chLast, arrFunctionNames)) != -1) cout << "function " << index<< " " <<arrFunctionNames[index][0];
-	//else if (isDouble(chFirst, chLast)) cout << "double " << atoi(chFirst);
+	//else 
+	//if (isDouble(expr, expr + 4))
+	//	cout << "double " << atof(expr);
 	//else cout << "undef";
 	//int n = 3;
 
@@ -197,7 +198,7 @@ void main()
 	//else cout << "undef";
 	//cout << endl << n;
 
-	/* 
+	/*
 	double outQueue[100];
 	char stack[200], *inputStack[200];
 	int opTop = -1, inpTop = 0, head = -1;
@@ -288,11 +289,6 @@ void main()
 	int pos = 0;
 	token = ntokenizer(input, pos);
 
-	//while (token.type != END){
-	//	print(token);
-	//	token = ntokenizer(input, pos);
-	//}
-	
 	while (token.type != END){
 		if (token.type == NUMBER){
 			print(token);
@@ -301,11 +297,11 @@ void main()
 
 		else if (token.type == BIN_OPERATOR){
 			while (opTop >= 0 && stack[opTop].type == BIN_OPERATOR){
-				if (token.binary.isLeftAssoc)
+				if (isLeftAssoc[token.binary.index])
 				{
-					if (token.binary.precedence > stack[opTop].binary.precedence) break;
+					if (binPrecedence[token.binary.index] > binPrecedence[stack[opTop].binary.index]) break;
 				}
-				else if (token.binary.precedence >= stack[opTop].binary.precedence) break;
+				else if (binPrecedence[token.binary.index] >=  binPrecedence[stack[opTop].binary.index]) break;
 
 				calcQueueHead(outQueue, head, stack[opTop].binary);
 				print(stack[opTop--]);
@@ -336,6 +332,6 @@ void main()
 	}
 	cout << "\nresult: ";
 	print(outQueue[0]);
-
+	cout << endl;
 	cin.get();
 }
