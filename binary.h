@@ -15,7 +15,6 @@ struct Binary
 	double (*pFunc) (double, double);
 	//bool isLeftAssoc;
 	//int precedence;
-	int index;
 };
 
 char* addNames[] = { "+", "plus", NULL };
@@ -53,11 +52,11 @@ double div (double op1, double op2) { return op2 == 0 ? 0 : op1 / op2; }
 double mlt (double op1, double op2) { return op1 * op2; }
 
 const Binary arrBinary[] = {
-	{ add, 0},
-	{ sub, 1 },
-	{ mlt, 2 },
-	{ div, 3 },
-	{ pow, 4 }
+	{ add},
+	{ sub },
+	{ mlt },
+	{ div },
+	{ pow }
 };
 const int binaryCount = sizeof(arrBinary) / sizeof(arrBinary[0]);
 

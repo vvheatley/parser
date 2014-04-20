@@ -26,6 +26,7 @@ enum ttype{
 struct Value
 {
 	ttype type;
+	int index;
 	union {
 		double number;
 		Binary binary;
@@ -33,11 +34,18 @@ struct Value
 		Function function;
 	};
 	Value(){}
-	Value (ttype val2type, double val2num) : type(val2type), number(val2num){}; 
-	Value(const Value &val2): type (val2.type) {
+	
+	Value (double val2num) : type(NUMBER), number(val2num){}; 
+	
+	Value(const Value &val2): type (val2.type) 
+	{	
 		if (val2.type == NUMBER) number = val2.number;
-		else if (val2.type == BIN_OPERATOR) binary = val2.binary;
-		else if (val2.type == FUNCTION) function = val2.function;
+		else {
+			index = val2.index;
+			if (val2.type == UN_OPERATOR) unary = val2.unary;
+			else if (val2.type == BIN_OPERATOR) binary = val2.binary;	
+			else if (val2.type == FUNCTION) function = val2.function;	
+		}
 	}
 };
 

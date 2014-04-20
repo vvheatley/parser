@@ -19,18 +19,18 @@ const int functionCount = sizeof(arrFunctionNames) / sizeof(arrFunctionNames[0])
 struct Function
 {
 	int argsCnt;
-	double(*foo) (double);
-	int index;
+	double(*pFunc) (double);
+	//int index;
 
 };
 
 double cot(double x) { return tan(3.1415 / 2 - x); }
 
 Function arrFunction[] = {
-	{ 1, sin, 0 },
-	{ 1, cos, 1 },
-	{ 1, tan, 2 },
-	{ 1, cot, 3 }
+	{ 1, sin },
+	{ 1, cos },
+	{ 1, tan },
+	{ 1, cot }
 };
 
 #endif

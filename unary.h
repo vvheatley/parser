@@ -2,13 +2,11 @@
 #ifndef UNARY_H
 #define UNARY_H
 //-----------------------------------------------------------------------------
-
-
 struct Unary
 {
 	double (*pFunc) (double);
 	//int precedence;
-	int index;
+	//int index;
 };
 
 char* negNames[] = { "-",  NULL };
@@ -21,7 +19,7 @@ char** arrUnaryNames[] = {
 };
 
 double neg (double op) { return -op; }
-double pos (double op) { return -op; }
+double pos (double op) { return op; }
 
 bool isPrefix[] = {
 	true,
@@ -32,8 +30,8 @@ int unPrecedence[] = {
 	0
 };
 const Unary arrUnary[] = {
-	{ neg, 0},
-	{ pos, 1 },
+	{ neg },
+	{ pos },
 
 };
 
