@@ -17,7 +17,6 @@ inline int isGarantedDelim (char *chFirst)
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
 inline int findName(char* chFirst, char* chLast, char*** arrExampleNames)
 {
 	int index = 0;
@@ -46,7 +45,7 @@ inline int findName(char* chFirst, char* chLast, char*** arrExampleNames)
 	return -1;
 }
 //---------------------------------------------------------------------------------
-inline bool isDouble (char* chFirst, char* chLast){
+inline bool isFloat (char* chFirst, char* chLast){
 	int size1 = 0; //до крапки
 	int size2 = 0; //після крапки
 
@@ -115,7 +114,7 @@ Value ntokenizer( char *expr, int &pos)
 			int index;
 
 			//if is double { retValue.ttype = NUMBER; retValue.number = atoi (token); }
-			if (isDouble(chFirst, chLast)) {
+			if (isFloat(chFirst, chLast)) {
 				retValue.type = NUMBER;
 				retValue.number = atof(chFirst);
 				break;
@@ -143,19 +142,26 @@ Value ntokenizer( char *expr, int &pos)
 	pos = chLast - expr;
 	return retValue;
 }
-
-
+//------------------------------------------------------------------------------------------
 template <size_t size>
-void calcQueueHead(Value (&queue)[size], int &head, const Binary &op)
+void calcQueueHead(Value (&queue)[size], int &head, const Unary &op)
 {
-	Value result;
-	result.type = NUMBER;
-	result.number = op.pFunc(queue[head-1].number, queue[head].number);
-
-	queue[head - 1] = result;
-	--head;
+	queue[head] = Value (NUMBER, op.pFunc(queue[head].number));
 }
+//------------------------------------------------------------------------------------------
+template <size_t size>
+void calcQueueHead(Value (&queue)[size], int &head, const Value &op)
+{
+	if (op.type == BIN_OPERATOR){
+		queue[head - 1] = Value (NUMBER, op.pFunc(queue[head-1].number, queue[head].number));
+		--head;
+	}
 
+	else if (op.type == UN_OPERATOR){
+		queue[head] = Value (NUMBER, op.pFunc(queue[head].number));
+	}
+}
+//------------------------------------------------------------------------------------------
 void print(const Value &val)
 {
 	switch(val.type){
@@ -287,12 +293,17 @@ void main()
 	cin.getline(input, 300);
 
 	int pos = 0;
+	ttype prevTokenType = LBRACKET;
 	token = ntokenizer(input, pos);
 
 	while (token.type != END){
 		if (token.type == NUMBER){
 			print(token);
 			outQueue[++head] = token;
+		}
+
+		else if (token.type == UN_OPERATOR){
+			stack[++opTop] = token;
 		}
 
 		else if (token.type == BIN_OPERATOR){
@@ -303,7 +314,7 @@ void main()
 				}
 				else if (binPrecedence[token.binary.index] >=  binPrecedence[stack[opTop].binary.index]) break;
 
-				calcQueueHead(outQueue, head, stack[opTop].binary);
+				calcQueueHead(outQueue, head, stack[opTop]);
 				print(stack[opTop--]);
 			}
 			stack[++opTop] = token;
@@ -315,19 +326,20 @@ void main()
 
 		else if (token.type == RBRACKET){
 			while (stack[opTop].type != LBRACKET){
-				calcQueueHead(outQueue, head, stack[opTop].binary);
+				calcQueueHead(outQueue, head, stack[opTop]);
 				print(stack[opTop--]);
 			}
 			if (opTop >= 0) opTop--;
 			else { cout << "\nError"; opTop = -1; cin.get(); exit(1); }
 		}
+		prevTokenType = token.type;
 		token = ntokenizer(input, pos);
 	} //end while
 
 	//--------------
 	while (opTop >= 0){
 		if (stack[opTop].type != BIN_OPERATOR) { cout << "\nError"; cin.get(); exit(1); }
-		calcQueueHead(outQueue, head, stack[opTop].binary);
+		calcQueueHead(outQueue, head, stack[opTop]);
 		print (stack[opTop--]);
 	}
 	cout << "\nresult: ";
