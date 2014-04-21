@@ -316,7 +316,12 @@ void main()
 			print(token);
 			outQueue[++head] = token;
 		}
+		/*if is postfix
 
+		if is prefix
+		
+		
+		*/
 		else if (token.type == UN_OPERATOR){
 			while (opTop >= 0 && stack[opTop].type == UN_OPERATOR){
 				if (isPrefix[token.index])
