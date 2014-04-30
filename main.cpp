@@ -322,31 +322,58 @@ void main()
 		
 		
 		*/
-		else if (token.type == UN_OPERATOR){
-			while (opTop >= 0 && stack[opTop].type == UN_OPERATOR){
-				if (isPrefix[token.index])
-				{
-					if (unPrecedence[token.index] > unPrecedence[stack[opTop].index]) break;
-				}
-				else if (unPrecedence[token.index] >=  unPrecedence[stack[opTop].index]) break;
+		//else if (token.type == UN_OPERATOR){
+		//	while (opTop >= 0 && stack[opTop].type == UN_OPERATOR){
+		//		if (isPrefix[token.index])
+		//		{
+		//			if (unPrecedence[token.index] > unPrecedence[stack[opTop].index]) break;
+		//		}
+		//		else if (unPrecedence[token.index] >=  unPrecedence[stack[opTop].index]) break;
 
-				calcQueueHead(outQueue, head, stack[opTop]);
-				print(stack[opTop--]);
+		//		calcQueueHead(outQueue, head, stack[opTop]);
+		//		print(stack[opTop--]);
+		//	}
+		//	stack[++opTop] = token;
+		//}
+		else if (token.type == UN_OPERATOR){
+			if (isPrefix[token.index]){
+				while (opTop >= 0 && (stack[opTop].type == BIN_OPERATOR || stack[opTop].type == UN_OPERATOR)){
+					if (stack[opTop].type == BIN_OPERATOR || (stack[opTop].type == UN_OPERATOR && unPrecedence[token.index] > unPrecedence[stack[opTop].index])) break;
+					calcQueueHead(outQueue, head, stack[opTop]);
+					print(stack[opTop--]);
+				}
 			}
+
+			else {
+				while (opTop >= 0 && (stack[opTop].type == BIN_OPERATOR || stack[opTop].type == UN_OPERATOR)){
+					if (stack[opTop].type == BIN_OPERATOR || (stack[opTop].type == UN_OPERATOR && unPrecedence[token.index] >= unPrecedence[stack[opTop].index])) break;
+					calcQueueHead(outQueue, head, stack[opTop]);
+					print(stack[opTop--]);
+				}
+
+			}
+			//------------
 			stack[++opTop] = token;
 		}
-
+		//-----------------------------------------------------------------------
 		else if (token.type == BIN_OPERATOR){
-			while (opTop >= 0 && stack[opTop].type == BIN_OPERATOR ){
-				if (isLeftAssoc[token.index])
-				{
-					if (binPrecedence[token.index] > binPrecedence[stack[opTop].index]) break;
+			if (isLeftAssoc[token.index]){
+				while (opTop >= 0 && (stack[opTop].type == BIN_OPERATOR || stack[opTop].type == UN_OPERATOR) ){
+					if (stack[opTop].type == BIN_OPERATOR && binPrecedence[token.index] > binPrecedence[stack[opTop].index]) break;
+					calcQueueHead(outQueue, head, stack[opTop]);
+					print(stack[opTop--]);
 				}
-				else if (binPrecedence[token.index] >=  binPrecedence[stack[opTop].index]) break;
-
-				calcQueueHead(outQueue, head, stack[opTop]);
-				print(stack[opTop--]);
 			}
+
+			else {
+				while (opTop >= 0 && (stack[opTop].type == BIN_OPERATOR || stack[opTop].type == UN_OPERATOR)){
+					if (stack[opTop].type == BIN_OPERATOR && binPrecedence[token.index] >= binPrecedence[stack[opTop].index]) break;
+					calcQueueHead(outQueue, head, stack[opTop]);
+					print(stack[opTop--]);
+				}
+
+			}
+			//------------
 			stack[++opTop] = token;
 		}
 
