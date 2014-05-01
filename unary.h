@@ -8,34 +8,45 @@ struct Unary
 	//int precedence;
 	//int index;
 };
+//-----------------------------------------------------------------------------
+char* negNames[]  = { "-", NULL };
+char* posNames[]  = { "+", NULL };
+char* factNames[] = { "!", NULL };
 
-char* negNames[] = { "-",  NULL };
-char* posNames[] = { "+", NULL };
-
-char** arrUnaryNames[] = {
+double neg (double op)	{ return -op;	}
+double pos (double op)	{ return op;	}
+double fact(double op)	{ return tgamma(op+1);	}
+//--------------
+char** arrPrefixUnaryNames[] = {
 	negNames,
 	posNames,
 	NULL
 };
+const int prefixUnaryCnt = sizeof(arrPrefixUnaryNames) / sizeof(Unary) - 1;
+//--------------
+char** arrPostfixUnaryNames[] = {
+	factNames,
+	NULL
 
-double neg (double op) { return -op; }
-double pos (double op) { return op; }
+};
 
-bool isPrefix[] = {
+const int unaryCnt = prefixUnaryCnt + sizeof(arrPostfixUnaryNames) / sizeof(Unary) - 1;
+//-----------------------------------------------------------------
+const Unary arrUnary[unaryCnt] = {
+	{ neg	},
+	{ pos	},
+	{ fact	}
+
+};
+int unPrecedence[unaryCnt] = {
+	2,
+	2,
+	4
+};
+
+bool isPrefix[unaryCnt] = {
 	true,
-	true
+	true,
+	false
 };
-int unPrecedence[] = {
-	0,
-	0
-};
-const Unary arrUnary[] = {
-	{ neg },
-	{ pos },
-
-};
-
-
-const int unaryCount = sizeof(arrUnary) / sizeof(arrUnary[0]);
-
 #endif

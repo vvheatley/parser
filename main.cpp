@@ -84,7 +84,7 @@ inline bool isFloat (char* chFirst, char* chLast){
 	return true;
 }
 //------------------------------------------------------------------------------
-Value ntokenizer(char *expr, int &pos, const ttype prevTokenType)
+Value ntokenizer(char *expr, int &pos, const ttype prevTokenType, const int prevTokenIndex)
 {
 	Value retValue;
 	//delete token;
@@ -124,7 +124,7 @@ Value ntokenizer(char *expr, int &pos, const ttype prevTokenType)
 			if is Function ...
 	}
 	*/
-	else {
+	else if (prevTokenType == NUMBER || prevTokenType == RBRACKET || (prevTokenType == UN_OPERATOR && !isPrefix[prevTokenIndex])){
 		while (isGarantedDelim(chLast) == -1) ++chLast;
 
 		while (chLast > chFirst){
@@ -136,7 +136,15 @@ Value ntokenizer(char *expr, int &pos, const ttype prevTokenType)
 				retValue.number = atof(chFirst);
 				break;
 			}
-			
+
+			//if is postfix Unary
+			else if ((index = findName(chFirst, chLast, arrPostfixUnaryNames)) != -1){
+				retValue.type = UN_OPERATOR;
+				retValue.unary = arrUnary[prefixUnaryCnt + index];
+				retValue.index = prefixUnaryCnt + index;
+				break;
+			}
+
 			//if isBinary 
 			else if ((index = findName(chFirst, chLast, arrBinaryNames)) != -1) {
 				retValue.type = BIN_OPERATOR;
@@ -156,6 +164,47 @@ Value ntokenizer(char *expr, int &pos, const ttype prevTokenType)
 			--chLast;
 		} //end while
 	}
+	else {
+		while (isGarantedDelim(chLast) == -1) ++chLast;
+
+		while (chLast > chFirst){
+			int index;
+
+			//if is float point type 
+			if (isFloat(chFirst, chLast)) {
+				retValue.type = NUMBER;
+				retValue.number = atof(chFirst);
+				break;
+			}
+
+			//if is prefix Unary
+			else if ((index = findName(chFirst, chLast, arrPrefixUnaryNames)) != -1){
+				retValue.type = UN_OPERATOR;
+				retValue.unary = arrUnary[index];
+				retValue.index = index;
+				break;
+			}
+
+			//if isBinary 
+			else if ((index = findName(chFirst, chLast, arrBinaryNames)) != -1) {
+				retValue.type = BIN_OPERATOR;
+				retValue.binary = arrBinary[index];
+				retValue.index = index;
+				break;
+			}
+
+			//if is Function
+			else if ((index = findName(chFirst, chLast, arrFunctionNames)) != -1){
+				retValue.type = FUNCTION;
+				retValue.function = arrFunction[index];
+				retValue.index = index;
+				break;
+			}
+
+			--chLast;
+		} //end while
+	}
+
 	pos = chLast - expr;
 	return retValue;
 }
@@ -183,7 +232,7 @@ void print(const Value &val)
 {
 	switch(val.type){
 		case NUMBER:		cout << val.number; break;
-		case UN_OPERATOR:	cout << "un" << arrBinaryNames[val.index][0]; break;
+		case UN_OPERATOR:	cout << "un" << (val.index < prefixUnaryCnt ? arrPrefixUnaryNames[val.index][0] : arrPostfixUnaryNames[val.index-prefixUnaryCnt][0]); break;
 		case BIN_OPERATOR:	cout << arrBinaryNames[val.index][0]; break;
 		case FUNCTION:		cout << arrFunctionNames[val.index][0]; break;
 		case LBRACKET:		cout << "("; break;
@@ -194,7 +243,12 @@ void print(const Value &val)
 	cout << " ";
 }
 //------------------------------------------------------------------------------------------
-
+inline int precedence(Value val){
+	if (val.type == UN_OPERATOR){
+		return unPrecedence[val.index];
+	}
+	return binPrecedence[val.index];
+}
 void main()
 {
 	//cout << sizeof (Value) << " " << " " << sizeof (ttype) << "\n" << sizeof (double) << " " << sizeof (Binary) << " " << sizeof (Unary) << " " <<  sizeof (Function);
@@ -309,7 +363,8 @@ void main()
 
 	int pos = 0;
 	ttype prevTokenType = LBRACKET;
-	token = ntokenizer(input, pos, prevTokenType);
+	int prevTokenIndex = 0;
+	token = ntokenizer(input, pos, prevTokenType, prevTokenIndex);
 	//-----------------------------
 	while (token.type != END){
 		if (token.type == NUMBER){
@@ -322,35 +377,15 @@ void main()
 		
 		
 		*/
-		//else if (token.type == UN_OPERATOR){
-		//	while (opTop >= 0 && stack[opTop].type == UN_OPERATOR){
-		//		if (isPrefix[token.index])
-		//		{
-		//			if (unPrecedence[token.index] > unPrecedence[stack[opTop].index]) break;
-		//		}
-		//		else if (unPrecedence[token.index] >=  unPrecedence[stack[opTop].index]) break;
-
-		//		calcQueueHead(outQueue, head, stack[opTop]);
-		//		print(stack[opTop--]);
-		//	}
-		//	stack[++opTop] = token;
-		//}
+		//------------
 		else if (token.type == UN_OPERATOR){
-			if (isPrefix[token.index]){
+			if (!isPrefix[token.index]){
 				while (opTop >= 0 && (stack[opTop].type == BIN_OPERATOR || stack[opTop].type == UN_OPERATOR)){
-					if (stack[opTop].type == BIN_OPERATOR || (stack[opTop].type == UN_OPERATOR && unPrecedence[token.index] > unPrecedence[stack[opTop].index])) break;
+					if (precedence(token) >= precedence(stack[opTop])) break;
+
 					calcQueueHead(outQueue, head, stack[opTop]);
 					print(stack[opTop--]);
 				}
-			}
-
-			else {
-				while (opTop >= 0 && (stack[opTop].type == BIN_OPERATOR || stack[opTop].type == UN_OPERATOR)){
-					if (stack[opTop].type == BIN_OPERATOR || (stack[opTop].type == UN_OPERATOR && unPrecedence[token.index] >= unPrecedence[stack[opTop].index])) break;
-					calcQueueHead(outQueue, head, stack[opTop]);
-					print(stack[opTop--]);
-				}
-
 			}
 			//------------
 			stack[++opTop] = token;
@@ -359,7 +394,7 @@ void main()
 		else if (token.type == BIN_OPERATOR){
 			if (isLeftAssoc[token.index]){
 				while (opTop >= 0 && (stack[opTop].type == BIN_OPERATOR || stack[opTop].type == UN_OPERATOR) ){
-					if (stack[opTop].type == BIN_OPERATOR && binPrecedence[token.index] > binPrecedence[stack[opTop].index]) break;
+					if (precedence(token) > precedence(stack[opTop])) break;
 					calcQueueHead(outQueue, head, stack[opTop]);
 					print(stack[opTop--]);
 				}
@@ -367,16 +402,15 @@ void main()
 
 			else {
 				while (opTop >= 0 && (stack[opTop].type == BIN_OPERATOR || stack[opTop].type == UN_OPERATOR)){
-					if (stack[opTop].type == BIN_OPERATOR && binPrecedence[token.index] >= binPrecedence[stack[opTop].index]) break;
+					if (precedence(token) >= precedence(stack[opTop])) break;
 					calcQueueHead(outQueue, head, stack[opTop]);
 					print(stack[opTop--]);
 				}
-
 			}
 			//------------
 			stack[++opTop] = token;
 		}
-
+		
 		else if (token.type == LBRACKET) {
 			stack[++opTop] = token;
 		}
@@ -390,7 +424,8 @@ void main()
 			else { cout << "\nError"; opTop = -1; cin.get(); exit(1); }
 		}
 		prevTokenType = token.type;
-		token = ntokenizer(input, pos, prevTokenType);
+		prevTokenIndex = token.index;
+		token = ntokenizer(input, pos, prevTokenType, prevTokenIndex);
 	} //end while
 
 	//--------------
