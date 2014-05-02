@@ -9,8 +9,8 @@ struct Unary
 	//int index;
 };
 //-----------------------------------------------------------------------------
-char* negNames[]  = { "-", NULL };
-char* posNames[]  = { "+", NULL };
+char* negNames[]  = { "-","minus", NULL };
+char* posNames[]  = { "+", "plus", NULL };
 char* factNames[] = { "!", NULL };
 
 double neg (double op)	{ return -op;	}

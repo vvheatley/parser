@@ -24,7 +24,7 @@ struct Function
 
 };
 
-double cot(double x) { return tan(3.1415 / 2 - x); }
+double cot(double x) { return tan(M_PI / 2 - x); }
 
 Function arrFunction[] = {
 	{ 1, sin },

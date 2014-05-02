@@ -17,11 +17,11 @@ struct Binary
 	//int precedence;
 };
 
-char* addNames[] = { "+", "plus", NULL };
-char* subNames[] = { "-", "minus", NULL };
-char* mltNames[] = { "*", "mult", NULL };
-char* divNames[] = { "/", "divide", NULL };
-char* powNames[] = { "^", "**", NULL };
+char* addNames[] = { "+", "plus", NULL	};
+char* subNames[] = { "-", "minus", NULL	};
+char* mltNames[] = { "*", "mult", NULL	};
+char* divNames[] = { "/", "divide", NULL};
+char* powNames[] = { "^", "**", NULL	};
 
 char** arrBinaryNames[] = {
 	addNames,

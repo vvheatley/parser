@@ -161,6 +161,12 @@ Value ntokenizer(char *expr, int &pos, const ttype prevTokenType, const int prev
 				break;
 			}
 
+			//if is constant
+			else if ((index = findName(chFirst, chLast, arrConstNames)) != -1){
+				retValue.type = NUMBER;
+				retValue.number = arrConst[index];
+				break;
+			}
 			--chLast;
 		} //end while
 	}
@@ -198,6 +204,13 @@ Value ntokenizer(char *expr, int &pos, const ttype prevTokenType, const int prev
 				retValue.type = FUNCTION;
 				retValue.function = arrFunction[index];
 				retValue.index = index;
+				break;
+			}
+
+			//if is constant
+			else if ((index = findName(chFirst, chLast, arrConstNames)) != -1){
+				retValue.type = NUMBER;
+				retValue.number = arrConst[index];
 				break;
 			}
 
